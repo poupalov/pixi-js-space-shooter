@@ -1,26 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { CSSProperties, useEffect, useRef } from "react";
+import * as PIXI from "pixi.js";
+
+import { startGame } from "./game";
 
 function App() {
+  const domRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const pixiApp = new PIXI.Application({ width: 640, height: 360 });
+    domRef.current?.appendChild(pixiApp.view);
+    startGame(pixiApp);
+  }, []);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="App" style={style}>
+      <div ref={domRef} />;
     </div>
   );
 }
 
 export default App;
+
+const style: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh",
+};
