@@ -14,7 +14,7 @@ export function addRandomEnemies(
 ): { [enemyId: string]: Enemy } {
   const enemies: { [enemyId: string]: Enemy } = {};
   const addEnemy = () => {
-    const enemyId = (Math.random() * 1000000).toFixed(); // 6 digit
+    const enemyId = (Math.random() * 1000000).toFixed();
     const enemySprite = PIXI.Sprite.from("sample.png");
     app.stage.addChild(enemySprite);
     const spriteHeightToWidthRatio = enemySprite.height / enemySprite.width;
