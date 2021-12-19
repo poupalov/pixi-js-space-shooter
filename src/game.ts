@@ -8,7 +8,8 @@ export function startGame(app: PIXI.Application) {
   const playerSprite = getPlayerSprite();
   app.stage.addChild(playerSprite);
   movePlayerSprite(app, playerInputs, playerSprite);
-  addRandomEnemies(app);
+  const enemies: { [enemyId: string]: Enemy } = addRandomEnemies(app);
+  handleCollisions(app, playerSprite, enemies);
 }
 
 function getPlayerSprite() {
@@ -40,8 +41,16 @@ function movePlayerSprite(
 const ENEMY_SPAWN_RATE_IN_MILISECONDS = 5 * 1000;
 const ENEMY_MAX_DURATION_IN_MILISECONDS = 10 * 1000;
 
-function addRandomEnemies(app: PIXI.Application) {
+type Enemy = {
+  id: string;
+  sprite: PIXI.Sprite;
+  delete: () => void;
+};
+
+function addRandomEnemies(app: PIXI.Application): { [enemyId: string]: Enemy } {
+  const enemies: { [enemyId: string]: Enemy } = {};
   const addEnemy = () => {
+    const enemyId = (Math.random() * 1000000).toFixed(); // 6 digit
     const enemySprite = PIXI.Sprite.from("sample.png");
     app.stage.addChild(enemySprite);
     const spriteHeightToWidthRatio = enemySprite.height / enemySprite.width;
@@ -52,11 +61,43 @@ function addRandomEnemies(app: PIXI.Application) {
     const moveEnemy = (timeDelta: number) => {
       enemySprite.y += timeDelta * 1;
     };
-    app.ticker.add(moveEnemy);
-    setTimeout(() => {
+    const deleteEnemy = () => {
       app.ticker.remove(moveEnemy);
       enemySprite.destroy();
-    }, ENEMY_MAX_DURATION_IN_MILISECONDS);
+      delete enemies[enemyId];
+    };
+    app.ticker.add(moveEnemy);
+    setTimeout(() => deleteEnemy, ENEMY_MAX_DURATION_IN_MILISECONDS);
+    enemies[enemyId] = {
+      id: enemyId,
+      sprite: enemySprite,
+      delete: deleteEnemy,
+    };
   };
   setInterval(addEnemy, ENEMY_SPAWN_RATE_IN_MILISECONDS);
+  return enemies;
+}
+
+function handleCollisions(
+  app: PIXI.Application,
+  playerSprite: PIXI.Sprite,
+  enemies: { [enemyId: string]: Enemy }
+) {
+  const detectCollision = (
+    playerSprite: PIXI.Sprite,
+    enemySprite: PIXI.Sprite
+  ): boolean => {
+    const playerBounds = playerSprite.getBounds();
+    const enemyBounds = enemySprite.getBounds();
+    return (
+      playerBounds.left < enemyBounds.right &&
+      playerBounds.right > enemyBounds.left &&
+      playerBounds.top < enemyBounds.bottom &&
+      playerBounds.bottom > enemyBounds.top
+    );
+  };
+  app.ticker.add(() => {
+    for (const enemy of Object.values(enemies))
+      if (detectCollision(playerSprite, enemy.sprite)) enemy.delete();
+  });
 }
