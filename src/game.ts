@@ -1,17 +1,35 @@
 import * as PIXI from "pixi.js";
 
+import { getPlayerInputs, PlayerInput } from "./playerInput";
+
 export function startGame(app: PIXI.Application) {
-  const sprite = PIXI.Sprite.from("../sample.png"); // Load sprite
-  app.stage.addChild(sprite); // Draw sprite
-  // Add a variable to count up the seconds our demo has been running
-  let elapsed = 0.0;
-  // Tell our application's ticker to run a new callback every frame, passing
-  // in the amount of time that has passed since the last tick
-  app.ticker.add((delta) => {
-    // Add the time to our total elapsed time
-    elapsed += delta;
-    // Update the sprite's X position based on the cosine of our elapsed time.  We divide
-    // by 50 to slow the animation down a bit...
-    sprite.x = 100.0 + Math.cos(elapsed / 50.0) * 100.0;
+  console.log(app.view.height, app.view.width);
+  const playerInputs: Set<PlayerInput> = getPlayerInputs();
+  const playerSprite = getPlayerSprite();
+  app.stage.addChild(playerSprite);
+  movePlayerSprite(app, playerInputs, playerSprite);
+}
+
+function getPlayerSprite() {
+  const playerSprite = PIXI.Sprite.from("sample.png");
+  const spriteHeightToWidthRatio = playerSprite.height / playerSprite.width;
+  playerSprite.width = 150;
+  playerSprite.height = 150 * spriteHeightToWidthRatio;
+  return playerSprite;
+}
+
+function movePlayerSprite(
+  app: PIXI.Application,
+  playerInputs: Set<PlayerInput>,
+  playerSprite: PIXI.Sprite
+) {
+  app.ticker.add((timeDelta) => {
+    if (playerInputs.has(PlayerInput.moveUp)) playerSprite.y -= timeDelta * 2;
+    if (playerInputs.has(PlayerInput.moveDown)) playerSprite.y += timeDelta * 2;
+    if (playerInputs.has(PlayerInput.moveLeft)) playerSprite.x -= timeDelta * 2;
+    if (playerInputs.has(PlayerInput.moveRight))
+      playerSprite.x += timeDelta * 2;
+    playerSprite.x = Math.max(0, Math.min(playerSprite.x, app.view.width));
+    playerSprite.y = Math.max(0, Math.min(playerSprite.y, app.view.height));
   });
 }
