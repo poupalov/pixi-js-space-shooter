@@ -1,5 +1,8 @@
 import * as PIXI from "pixi.js";
 
+import { getMutexLock, MutexLock } from "./lock";
+import { Shot, addShot } from "./shots";
+
 export function addPlayer(app: PIXI.Application): Player {
   const player: Player = getPlayer();
   app.stage.addChild(player.sprite);
@@ -7,7 +10,7 @@ export function addPlayer(app: PIXI.Application): Player {
   player.sprite.x = app.view.width / 2;
   player.sprite.y = app.view.height - 150;
   app.ticker.add((timeDelta) => {
-    if (playerInputs.has(PlayerInput.fire)) fireShip(app, playerSprite);
+    if (playerInputs.has(PlayerInput.fire)) fireShot(app, player);
     if (playerInputs.has(PlayerInput.moveUp)) playerSprite.y -= timeDelta * 2;
     if (playerInputs.has(PlayerInput.moveDown)) playerSprite.y += timeDelta * 2;
     if (playerInputs.has(PlayerInput.moveLeft)) playerSprite.x -= timeDelta * 2;
@@ -23,7 +26,8 @@ export type Player = {
   id: string;
   sprite: PIXI.Sprite;
   inputs: Set<PlayerInput>;
-  canFire: boolean;
+  canFireLock: MutexLock;
+  firedShots: { [shotId: string]: Shot };
 };
 
 function getPlayer(): Player {
@@ -31,7 +35,8 @@ function getPlayer(): Player {
     id: (Math.random() * 1000000).toFixed(),
     sprite: getPlayerSprite(),
     inputs: getPlayerInputs(),
-    canFire: true,
+    canFireLock: getMutexLock(),
+    firedShots: {},
   };
 }
 
@@ -76,24 +81,11 @@ function getPlayerInputs(): Set<PlayerInput> {
   return playerInputs;
 }
 
-const SHIP_MAX_DURATION_IN_MILISECONDS = 10 * 1000;
+const FIRE_RELOAD_TIME_IN_MILISECONDS = 1 * 1000;
 
-function fireShip(app: PIXI.Application, playerSprite: PIXI.Sprite): void {
-  const shipSprite = PIXI.Sprite.from("sample.png");
-  const spriteHeightToWidthRatio = shipSprite.height / shipSprite.width;
-  shipSprite.x = playerSprite.x;
-  shipSprite.y = playerSprite.y;
-  shipSprite.width = 50;
-  shipSprite.height = 50 * spriteHeightToWidthRatio;
-  app.stage.addChild(shipSprite);
-  const moveShip = (timeDelta: number) => {
-    shipSprite.y -= timeDelta * 5;
-  };
-  app.ticker.add(moveShip);
-  const deleteShip = () => {
-    app.ticker.remove(moveShip);
-    shipSprite.destroy();
-  };
-  setTimeout(deleteShip, SHIP_MAX_DURATION_IN_MILISECONDS);
-  // return shipSprite;
+function fireShot(app: PIXI.Application, player: Player): void {
+  if (player.canFireLock.tryToAcquire()) {
+    setTimeout(player.canFireLock.release, FIRE_RELOAD_TIME_IN_MILISECONDS);
+    addShot(app, player);
+  }
 }

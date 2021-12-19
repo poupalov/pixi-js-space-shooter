@@ -1,27 +1,39 @@
 import * as PIXI from "pixi.js";
 
+import { Player } from "./player";
 import { Enemy } from "./enemies";
 
 export function handleCollisions(
   app: PIXI.Application,
-  playerSprite: PIXI.Sprite,
+  player: Player,
   enemies: { [enemyId: string]: Enemy }
 ) {
-  const detectCollision = (
-    playerSprite: PIXI.Sprite,
-    enemySprite: PIXI.Sprite
-  ): boolean => {
-    const playerBounds = playerSprite.getBounds();
-    const enemyBounds = enemySprite.getBounds();
-    return (
-      playerBounds.left < enemyBounds.right &&
-      playerBounds.right > enemyBounds.left &&
-      playerBounds.top < enemyBounds.bottom &&
-      playerBounds.bottom > enemyBounds.top
-    );
-  };
   app.ticker.add(() => {
     for (const enemy of Object.values(enemies))
-      if (detectCollision(playerSprite, enemy.sprite)) enemy.delete();
+      destroyEnemyOnCollision(enemy, player);
   });
+}
+
+function destroyEnemyOnCollision(enemy: Enemy, player: Player) {
+  if (detectCollision(player.sprite, enemy.sprite)) {
+    enemy.delete();
+    return;
+  }
+  for (const firedShot of Object.values(player.firedShots))
+    if (detectCollision(firedShot.sprite, enemy.sprite)) {
+      enemy.delete();
+      firedShot.delete();
+      return;
+    }
+}
+
+function detectCollision(sprite1: PIXI.Sprite, sprite2: PIXI.Sprite): boolean {
+  const playerBounds = sprite1.getBounds();
+  const enemyBounds = sprite2.getBounds();
+  return (
+    playerBounds.left < enemyBounds.right &&
+    playerBounds.right > enemyBounds.left &&
+    playerBounds.top < enemyBounds.bottom &&
+    playerBounds.bottom > enemyBounds.top
+  );
 }

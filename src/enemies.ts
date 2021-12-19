@@ -25,13 +25,19 @@ export function addRandomEnemies(
     const moveEnemy = (timeDelta: number) => {
       enemySprite.y += timeDelta * 1;
     };
+    app.ticker.add(moveEnemy);
+    let timeoutToClear: NodeJS.Timeout | null;
     const deleteEnemy = () => {
       app.ticker.remove(moveEnemy);
-      enemySprite.destroy();
+      app.stage.removeChild(enemySprite);
       delete enemies[enemyId];
+      enemySprite.destroy();
+      if (timeoutToClear) clearTimeout(timeoutToClear);
     };
-    app.ticker.add(moveEnemy);
-    setTimeout(() => deleteEnemy, ENEMY_MAX_DURATION_IN_MILISECONDS);
+    timeoutToClear = setTimeout(
+      () => deleteEnemy,
+      ENEMY_MAX_DURATION_IN_MILISECONDS
+    );
     enemies[enemyId] = {
       id: enemyId,
       sprite: enemySprite,

@@ -8,5 +8,5 @@ export function startGame(app: PIXI.Application) {
   console.log(app.view.height, app.view.width);
   const player: Player = addPlayer(app);
   const enemies: { [enemyId: string]: Enemy } = addRandomEnemies(app);
-  handleCollisions(app, player.sprite, enemies);
+  handleCollisions(app, player, enemies);
 }
