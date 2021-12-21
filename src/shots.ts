@@ -11,12 +11,12 @@ export type Shot = {
 const SHOT_MAX_DURATION_IN_MILISECONDS = 10 * 1000;
 
 export function addShot(app: PIXI.Application, player: Player) {
-  const shotSprite = PIXI.Sprite.from("sample.png");
+  const shotSprite = PIXI.Sprite.from("fireball.png");
   shotSprite.x = player.sprite.x;
   shotSprite.y = player.sprite.y;
   const spriteHeightToWidthRatio = shotSprite.height / shotSprite.width;
-  shotSprite.width = 50;
-  shotSprite.height = 50 * spriteHeightToWidthRatio;
+  shotSprite.width = 25;
+  shotSprite.height = 25 * spriteHeightToWidthRatio;
   const shotId = (Math.random() * 1000000).toFixed();
   app.stage.addChild(shotSprite);
   const moveShot = (timeDelta: number) => {

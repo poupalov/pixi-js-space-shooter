@@ -3,6 +3,8 @@ import * as PIXI from "pixi.js";
 
 import { Game, startGame } from "./game";
 
+const NUMBER_OF_ENEMIES_TO_DESTROY = 10;
+
 function App() {
   const domRef = useRef<HTMLDivElement | null>(null);
   const [game, setGame] = useState<Game | undefined>(undefined);
@@ -14,7 +16,7 @@ function App() {
   const numberOfDestroyedEnemies = game?.numberOfDestroyedEnemies || 0;
   return (
     <div className="App" style={style}>
-      {numberOfDestroyedEnemies >= 10 ? (
+      {numberOfDestroyedEnemies >= NUMBER_OF_ENEMIES_TO_DESTROY ? (
         <h1>{"You won!"}</h1>
       ) : (
         <>
