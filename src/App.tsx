@@ -1,19 +1,27 @@
-import { CSSProperties, useEffect, useRef } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 
-import { startGame } from "./game";
+import { Game, startGame } from "./game";
 
 function App() {
   const domRef = useRef<HTMLDivElement | null>(null);
+  const [game, setGame] = useState<Game | undefined>(undefined);
   useEffect(() => {
     const pixiApp = new PIXI.Application({ width: 960, height: 540 });
     domRef.current?.appendChild(pixiApp.view);
-    startGame(pixiApp);
+    startGame(pixiApp, setGame);
   }, []);
+  const numberOfDestroyedEnemies = game?.numberOfDestroyedEnemies || 0;
   return (
     <div className="App" style={style}>
-      <h1>Welcome</h1>
-      <div ref={domRef} />;
+      {numberOfDestroyedEnemies >= 10 ? (
+        <h1>{"You won!"}</h1>
+      ) : (
+        <>
+          <h1>Number of destroyed enemies: {numberOfDestroyedEnemies}</h1>
+          <div ref={domRef} />
+        </>
+      )}
     </div>
   );
 }
