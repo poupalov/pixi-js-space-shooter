@@ -46,7 +46,7 @@ function getPlayer(): Player {
 }
 
 function getPlayerSprite() {
-  const playerSprite = PIXI.Sprite.from("sample.png");
+  const playerSprite = PIXI.Sprite.from("spaceship.png");
   const spriteHeightToWidthRatio = playerSprite.height / playerSprite.width;
   playerSprite.width = 150;
   playerSprite.height = 150 * spriteHeightToWidthRatio;
