@@ -4,6 +4,8 @@ This project was developed as a learning experience, to learn the basics of vide
 
 It experiments with basic game concepts such as collision detection or using locks to handle concurrent updates to the shared game state. In particular, a very simple mutex lock API is implemented using the Atomics API.
 
+A follow-up project was also made to learn multiplayer games' architecture: [pixi-js-multiplayer-space-shooter](https://github.com/poupalov/pixi-js-multiplayer-space-shooter)
+
 ## Running the game
 
 You first have to install the dependencies by running `npm i`.
